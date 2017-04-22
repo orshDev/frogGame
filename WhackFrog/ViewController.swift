@@ -7,16 +7,44 @@
 //
 
 import UIKit
+var Timer1 = Timer()
+var Counter = 20
 
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
 
     @IBOutlet weak var collectionView: UICollectionView!
     
-    
-    override func viewDidLoad() {
+    @IBOutlet var background: UIView?
+    @IBOutlet weak var TimerLabel: UILabel!
+        override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        //set background
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        UIImage(named: "swamp.jpg")?.draw(in: self.view.bounds)
+        
+        let image: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        
+        UIGraphicsEndImageContext()
+        
+        self.view.backgroundColor = UIColor(patternImage: image)
+            
+          DisplayTimer()
+         TimerLabel.text = "\(Counter)"
+       
+    }
+    
+    func DisplayTimer() {
+        Timer1 = Timer.scheduledTimer(timeInterval: 1.0, target:self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
+    }
+    
+    func updateTimer() {
+        if Counter != 0 {  TimerLabel.text = "\(Counter -= 1)"
+        } else {
+            Timer1.invalidate()
+            // call a game over method here...
+        }
     }
 
     func collectionView(_ collectionView:UICollectionView, numberOfItemsInSection section: Int) -> Int {
