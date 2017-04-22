@@ -14,6 +14,7 @@ var GameScore = 0
 var FrogCounter = 9
 var StopGame = false
 
+
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
 
     @IBOutlet weak var collectionView: UICollectionView!
@@ -31,19 +32,17 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
 
     
     
-    @IBOutlet weak var StartGameView: UIImageView!
+    @IBOutlet weak var StartGameView: UIImageView?
     @IBOutlet weak var StartNewGame: UIButton!
    
   
-    @IBOutlet weak var GameFinishHeader: UIImageView!
+    @IBOutlet weak var GameFinishHeader: UIImageView?
     
     @IBOutlet weak var ScoreBoard: UIImageView!
     
     @IBOutlet weak var TimeBoard: UIImageView!
     
-    @IBAction func StartNewGameClick(_ sender: UIButton) {
-        print("start new game")
-    }
+    
     
         override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,8 +111,8 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
              Timer1.invalidate()
             frogpop.invalidate()
             StopGame = true
-            GameFinishHeader.image = timeOverImage
-            StartGameView.image = #imageLiteral(resourceName: "newgame")
+            GameFinishHeader?.image = timeOverImage
+            StartGameView?.image = #imageLiteral(resourceName: "newgame")
             
            
             
@@ -121,11 +120,34 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         if (FrogCounter == 0){
             print("Game over you win")
             Timer1.invalidate()
-            GameFinishHeader.image = #imageLiteral(resourceName: "youwin")
-            StartGameView.image = #imageLiteral(resourceName: "newgame")
+            StopGame = true
+            self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
+            StartGameView?.image = #imageLiteral(resourceName: "newgame")
         }
     }
+    
+    
+    func turnofimages(){
+        GameFinishHeader?.image = nil
+        StartGameView?.image = nil
+    }
 
+    
+    @IBAction func StartNewGameClick(_ sender: UIButton) {
+        if (StopGame){
+            print("start new game")
+            GameScore = 0
+            FrogCounter = 9
+            Counter = 60
+            StopGame = false
+            turnofimages()
+            DisplayTimer()
+            //collectionView.reloadItems(at: [IndexPath])
+        }
+        
+        
+    }
+   
 }
 
 class GameCell: UICollectionViewCell {
