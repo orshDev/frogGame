@@ -7,12 +7,17 @@
 //
 
 import UIKit
+import AudioToolbox
+import AVFoundation
+
 var Timer1 = Timer()
 var frogpop : Timer!
-var Counter = 60
-var GameScore = 0
-var FrogCounter = 9
+var MissCounter = 0
+var HitFrogCounter = 0
 var StopGame = false
+var player:AVAudioPlayer?
+
+
 
 
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
@@ -21,7 +26,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     @IBOutlet var background: UIView?
     @IBOutlet weak var TimerLabel: UILabel!
-    var FlagTimeIsUp: Bool = false
+    var GameOver: Bool = false
     let winImage = UIImage(named:"youwin.jpg")
     let timeOverImage = UIImage(named:"gameover.jpg")
     
@@ -42,7 +47,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     @IBOutlet weak var TimeBoard: UIImageView!
     
-    
+     //  var player = AVAudioPlayer()
     
         override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,8 +66,9 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         ScoreBoard.image = boardImage
         TimeBoard.image = boardImage
         DisplayTimer()
-        TimerLabel.text = "Time: \(Counter)"
-        ScorePoint.text = "\(GameScore)"
+        TimerLabel.text = "\(MissCounter)"
+        ScorePoint.text = "\(HitFrogCounter)"
+      
             
     }
     
@@ -73,19 +79,19 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func updateTimer() {
         
 
-        if Counter != 0 {
-            Counter -= 1
-            print(Counter)
-            TimerLabel.text = "\(Counter)"
-            ScorePoint.text = "\(GameScore)"
+        if MissCounter != 3 {
+          
+            TimerLabel.text = "\(MissCounter)"
+            ScorePoint.text = "\(HitFrogCounter)"
         } else {
-            //print("finish")
-           
-            // call a game over method here...
-            FlagTimeIsUp=true
+            print("finish")
+            TimerLabel.text = "\(MissCounter)"
+            StopGame=true
         }
         checkFinishGame()
     }
+    
+    
 
     func collectionView(_ collectionView:UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 3
@@ -106,20 +112,20 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     }
     
     func checkFinishGame(){
-        if (FlagTimeIsUp) {
-            print("Game over Time is Up")
-             Timer1.invalidate()
+        if (StopGame) {
+            print("Game over you have 3 striks")
+            Timer1.invalidate()
             frogpop.invalidate()
-            StopGame = true
             GameFinishHeader?.image = timeOverImage
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
             
            
             
         }
-        if (FrogCounter == 0){
+        if (HitFrogCounter == 30){
             print("Game over you win")
             Timer1.invalidate()
+            frogpop.invalidate()
             StopGame = true
             self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
@@ -136,13 +142,17 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     @IBAction func StartNewGameClick(_ sender: UIButton) {
         if (StopGame){
             print("start new game")
-            GameScore = 0
-            FrogCounter = 9
-            Counter = 60
+            HitFrogCounter = 0
+            MissCounter = 0
             StopGame = false
             turnofimages()
+            TimerLabel.text = "\(MissCounter)"
+            ScorePoint.text = "\(HitFrogCounter)"
+            frogpop.fire()
             DisplayTimer()
+            
             //collectionView.reloadItems(at: [IndexPath])
+            
         }
         
         
@@ -157,24 +167,30 @@ class GameCell: UICollectionViewCell {
     
     var isFrog :Bool = false
     var hit: Bool = false
-    var Celllock: Bool = false
+    var counterpopFrog = 0
+    var numofpopFrog = 2
+   var urlSound = "http://soundbible.com/mp3/Bull Frog-SoundBible.com-1416996315.mp3"
+   // var Celllock: Bool = false
     
     
     @IBAction func btnHitFrog(_ sender: UIButton) {
         
      if (!StopGame){
-          if (!Celllock){
         
             if isFrog{
-                btnClickFrog.setImage(nil, for: .normal)
-                GameScore += 20
-                print("Score" + "\(GameScore)")
-                FrogCounter -= 1
-                print("NumOfFrogs" + "\(FrogCounter)")
+                btnClickFrog.setImage(leafImage, for: .normal)
+                HitFrogCounter += 1
+                print("Score" + "\(HitFrogCounter)")
+               // playSound()
                 hit = true
-                Celllock = true
+              
             }
-        }
+            else{
+                MissCounter += 1
+                print("NumOfmisses" + "\(MissCounter)")
+
+            }
+        //}
      }
         
        
@@ -199,21 +215,17 @@ class GameCell: UICollectionViewCell {
     
     func timeTohitFrog(){
         if (!StopGame){
-        
-            if (hit){
-                btnClickFrog.setImage(nil, for: .normal)
-            }
-            else{
-                
+            
                 if (!isFrog) {
                     isFrog=true
                     btnClickFrog.setImage(frogImage, for: .normal)
+                 
                     
                 } else {
                     isFrog = false
                     btnClickFrog.setImage(leafImage, for: .normal)
                 }
-            }
+         
         }
      
        
@@ -221,9 +233,23 @@ class GameCell: UICollectionViewCell {
     }
     
     func randomNumber() -> Double{
-        let randomNum:UInt32 = arc4random_uniform(6) + 3
+        let randomNum:UInt32 = arc4random_uniform(2) + 1
         let num:Double = Double(randomNum)
         return num
+    }
+    
+    func playSound() {
+        let url = Bundle.main.url(forResource: urlSound, withExtension: "mp3")!
+        
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            guard let player = player else { return }
+            
+            player.prepareToPlay()
+            player.play()
+        } catch let error as NSError {
+            print(error.description)
+        }
     }
     
     
