@@ -171,7 +171,7 @@ class GameCell: UICollectionViewCell {
     var numofpopFrog = 2
    var urlSound = "http://soundbible.com/mp3/Bull Frog-SoundBible.com-1416996315.mp3"
    // var Celllock: Bool = false
-    var i = 0
+    var i = 1
     
     
     @IBAction func btnHitFrog(_ sender: UIButton) {
