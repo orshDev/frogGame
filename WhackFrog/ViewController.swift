@@ -1,9 +1,7 @@
 //
 //  ViewController.swift
 //  WhackFrog
-//
-//  Created by Shani Oliel on 4/9/17.
-//  Copyright © 2017 Tamirg. All rights reserved.
+// Tamir Geva and Or Shechter
 //
 
 import UIKit
