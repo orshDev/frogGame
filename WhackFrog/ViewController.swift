@@ -22,6 +22,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
 
     @IBOutlet weak var collectionView: UICollectionView!
     
+    @IBOutlet weak var lblName: UITextField!
     @IBOutlet var background: UIView?
     @IBOutlet weak var TimerLabel: UILabel!
     var GameOver: Bool = false
@@ -33,7 +34,9 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     @IBOutlet weak var ScorePoint: UILabel!
 
+    @IBOutlet weak var btnSave: UIButton!
     
+    @IBOutlet weak var btnScores: UIButton!
     
     @IBOutlet weak var StartGameView: UIImageView?
     @IBOutlet weak var StartNewGame: UIButton!
@@ -117,8 +120,9 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             GameFinishHeader?.image = timeOverImage
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
             
-           
-            
+            btnScores.isHidden = false
+            lblName.isHidden = false
+            btnSave.isHidden = false
         }
         if (HitFrogCounter == 30){
             print("Game over you win")
@@ -127,15 +131,37 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             StopGame = true
             self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
+            
+            btnScores.isHidden = false
+            lblName.isHidden = false
+            btnSave.isHidden = false
         }
     }
     
+    
+    func saveScore() {
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let score = Score(context: context)
+        score.name = lblName.text!
+        score.score = Int16(HitFrogCounter)
+        score.date = Date() as NSDate?
+        
+        (UIApplication.shared.delegate as! AppDelegate).saveContext()
+        let _ = navigationController?.popViewController(animated: true)
+    }
     
     func turnofimages(){
         GameFinishHeader?.image = nil
         StartGameView?.image = nil
     }
 
+    @IBAction func btnSave(_ sender: Any) {
+        saveScore()
+        performSegue(withIdentifier: "ShowScoresSegue", sender: self)
+    }
+    @IBAction func ViewScoresTable(_ sender: Any) {
+        performSegue(withIdentifier: "ShowScoresSegue", sender: self)
+    }
     
     @IBAction func StartNewGameClick(_ sender: UIButton) {
         if (StopGame){
@@ -148,21 +174,20 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             ScorePoint.text = "\(HitFrogCounter)"
             frogpop.fire()
             DisplayTimer()
+            btnScores.isHidden = true
+
             
             //collectionView.reloadItems(at: [IndexPath])
             
         }
-        
-        
     }
-   
 }
 
 class GameCell: UICollectionViewCell {
     @IBOutlet weak var btnClickFrog: UIButton!
     let frogImage = UIImage(named:"frog.jpg")
     let leafImage = UIImage(named:"leaf.jpg")
-    
+    @IBOutlet weak var Frogview: UIImageView?
     var isFrog :Bool = false
     var hit: Bool = false
     var counterpopFrog = 0
@@ -197,15 +222,15 @@ class GameCell: UICollectionViewCell {
         
     }
     
+//    func initAnimation(){
+//    
+//       Frogview?.image = frogImage
+//        animation(element: Frogview!)
+//    }
+    
+    
     func initGame(){
-        
-     
         frogpop = Timer.scheduledTimer(timeInterval: randomNumber(), target: self, selector: #selector(timeTohitFrog), userInfo: nil, repeats: true)
-        
-        
-        
-        
-        
 
     }
     
@@ -215,12 +240,9 @@ class GameCell: UICollectionViewCell {
     
     func timeTohitFrog(){
         if (!StopGame){
-            
                 if (!isFrog) {
                     isFrog=true
                     btnClickFrog.setImage(frogImage, for: .normal)
-                 
-                    
                 } else {
                     isFrog = false
                     btnClickFrog.setImage(leafImage, for: .normal)
@@ -251,6 +273,15 @@ class GameCell: UICollectionViewCell {
             print(error.description)
         }
     }
+//    func animation(element: UIImageView!){
+//    
+//        element.animationDuration(0.8, delay: 0.2, usingSpringWithDamping:
+//            0.2, initialSpringVelocity: 0.5, options: .CurveEaseOut, animations: {
+//                self.shootedViewRightMarginConstraint.constant += 70
+//                self.view.layoutIfNeeded()
+//        }, completion: nil)
+//
+//    }
     
     
     

@@ -15,6 +15,7 @@
 		0F038DAF1E9AAAA200F36D04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F038DAD1E9AAAA200F36D04 /* LaunchScreen.storyboard */; };
 		0F038DBA1E9AAAA200F36D04 /* WhackFrogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F038DB91E9AAAA200F36D04 /* WhackFrogTests.swift */; };
 		0F038DC51E9AAAA200F36D04 /* WhackFrogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F038DC41E9AAAA200F36D04 /* WhackFrogUITests.swift */; };
+		0F2CF5961EDF3DD80064D2F7 /* ViewScoreController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2CF5951EDF3DD80064D2F7 /* ViewScoreController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		0F038DC01E9AAAA200F36D04 /* WhackFrogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WhackFrogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F038DC41E9AAAA200F36D04 /* WhackFrogUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhackFrogUITests.swift; sourceTree = "<group>"; };
 		0F038DC61E9AAAA200F36D04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0F2CF5951EDF3DD80064D2F7 /* ViewScoreController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewScoreController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				0F038DAD1E9AAAA200F36D04 /* LaunchScreen.storyboard */,
 				0F038DB01E9AAAA200F36D04 /* Info.plist */,
 				0F038DA81E9AAAA200F36D04 /* WhackFrog.xcdatamodeld */,
+				0F2CF5951EDF3DD80064D2F7 /* ViewScoreController.swift */,
 			);
 			path = WhackFrog;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F2CF5961EDF3DD80064D2F7 /* ViewScoreController.swift in Sources */,
 				0F038DAA1E9AAAA200F36D04 /* WhackFrog.xcdatamodeld in Sources */,
 				0F038DA41E9AAAA200F36D04 /* ViewController.swift in Sources */,
 				0F038DA21E9AAAA200F36D04 /* AppDelegate.swift in Sources */,
@@ -507,6 +511,7 @@
 				0F038DCB1E9AAAA200F36D04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0F038DCC1E9AAAA200F36D04 /* Build configuration list for PBXNativeTarget "WhackFrogTests" */ = {
 			isa = XCConfigurationList;
@@ -515,6 +520,7 @@
 				0F038DCE1E9AAAA200F36D04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0F038DCF1E9AAAA200F36D04 /* Build configuration list for PBXNativeTarget "WhackFrogUITests" */ = {
 			isa = XCConfigurationList;
@@ -523,6 +529,7 @@
 				0F038DD11E9AAAA200F36D04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
