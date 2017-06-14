@@ -19,7 +19,7 @@ var player:AVAudioPlayer?
 
 
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
-
+    
     @IBOutlet weak var collectionView: UICollectionView!
     
     @IBOutlet weak var lblName: UITextField!
@@ -32,25 +32,30 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     let boardImage = UIImage(named:"board.jpg")
     let newGameImage = UIImage(named:"newgame.jpg")
     
+    var scores : [Score] = []
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    var InHighScore:Bool = false;
+    
     @IBOutlet weak var ScorePoint: UILabel!
-
+    
     @IBOutlet weak var btnSave: UIButton!
     
     @IBOutlet weak var btnScores: UIButton!
     
     @IBOutlet weak var StartGameView: UIImageView?
     @IBOutlet weak var StartNewGame: UIButton!
-   
-  
+    
+    
     @IBOutlet weak var GameFinishHeader: UIImageView?
     
     @IBOutlet weak var ScoreBoard: UIImageView!
     
     @IBOutlet weak var TimeBoard: UIImageView!
     
-     //  var player = AVAudioPlayer()
+    //  var player = AVAudioPlayer()
     
-        override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
@@ -63,14 +68,14 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         UIGraphicsEndImageContext()
         
         self.view.backgroundColor = UIColor(patternImage: image)
-           
+        
         ScoreBoard.image = boardImage
         TimeBoard.image = boardImage
         DisplayTimer()
         TimerLabel.text = "\(MissCounter)"
         ScorePoint.text = "\(HitFrogCounter)"
-      
-            
+        
+        
     }
     
     func DisplayTimer() {
@@ -79,9 +84,9 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     func updateTimer() {
         
-
-        if MissCounter != 3 {
-          
+        
+        if MissCounter < 3 {
+            
             TimerLabel.text = "\(MissCounter)"
             ScorePoint.text = "\(HitFrogCounter)"
         } else {
@@ -93,7 +98,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     }
     
     
-
+    
     func collectionView(_ collectionView:UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 3
     }
@@ -120,9 +125,19 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             GameFinishHeader?.image = timeOverImage
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
             
-            btnScores.isHidden = false
-            lblName.isHidden = false
-            btnSave.isHidden = false
+            //check if in high score table
+            InHighScore = checkIfInHighScore()
+            if (InHighScore){
+                btnSave.isHidden = false
+                btnScores.isHidden = false
+                lblName.isHidden = false
+                
+            }
+            else{
+                btnSave.setTitle("continue",for : .normal)
+                btnSave.isHidden = false
+            }
+            
         }
         if (HitFrogCounter == 30){
             print("Game over you win")
@@ -132,21 +147,71 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
             
-            btnScores.isHidden = false
-            lblName.isHidden = false
-            btnSave.isHidden = false
+            
+            //check if in high score table
+            InHighScore = checkIfInHighScore()
+            if (InHighScore){
+                btnSave.isHidden = false
+                btnScores.isHidden = false
+                lblName.isHidden = false
+                
+            }
+            else{
+                btnSave.setTitle("continue",for : .normal)
+                btnSave.isHidden = false
+            }
+            
+            
         }
     }
     
+    func checkIfInHighScore()->Bool{
+        
+        let data =  getHighScorePlayersData()
+        
+        let currentScore = Int16(HitFrogCounter);
+        for playerdata in data
+        {
+            
+            if (playerdata.score<currentScore ){
+                return true
+            }
+            
+        }
+        
+        
+        return false
+    }
+    
+    func getHighScorePlayersData()->[Score]
+    {
+        do{
+            scores = try context.fetch(Score.fetchRequest())
+        }
+        catch{
+            print("Fetch Failed")
+        }
+        
+        return scores
+        
+    }
     
     func saveScore() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        let score = Score(context: context)
-        score.name = lblName.text!
-        score.score = Int16(HitFrogCounter)
-        score.date = Date() as NSDate?
+        if(InHighScore){
+            let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            let score = Score(context: context)
+            score.name = lblName.text!
+            score.score = Int16(HitFrogCounter)
+            score.date = Date() as NSDate?
+        }
+        
         
         (UIApplication.shared.delegate as! AppDelegate).saveContext()
+        let _ = navigationController?.popViewController(animated: true)
+    }
+    
+    func continueToScoreBoard(){
+        
         let _ = navigationController?.popViewController(animated: true)
     }
     
@@ -154,7 +219,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         GameFinishHeader?.image = nil
         StartGameView?.image = nil
     }
-
+    
     @IBAction func btnSave(_ sender: Any) {
         saveScore()
         performSegue(withIdentifier: "ShowScoresSegue", sender: self)
@@ -175,7 +240,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             frogpop.fire()
             DisplayTimer()
             btnScores.isHidden = true
-
+            
             
             //collectionView.reloadItems(at: [IndexPath])
             
@@ -192,46 +257,46 @@ class GameCell: UICollectionViewCell {
     var hit: Bool = false
     var counterpopFrog = 0
     var numofpopFrog = 2
-   var urlSound = "http://soundbible.com/mp3/Bull Frog-SoundBible.com-1416996315.mp3"
-   // var Celllock: Bool = false
+    var urlSound = "http://soundbible.com/mp3/Bull Frog-SoundBible.com-1416996315.mp3"
+    // var Celllock: Bool = false
     var i = 1
     //COMMITTTTT
     
     
     @IBAction func btnHitFrog(_ sender: UIButton) {
         
-     if (!StopGame){
-        
+        if (!StopGame){
+            
             if isFrog{
                 btnClickFrog.setImage(leafImage, for: .normal)
                 HitFrogCounter += 1
                 print("Score" + "\(HitFrogCounter)")
-               // playSound()
+                // playSound()
                 hit = true
-              
+                
             }
             else{
                 MissCounter += 1
                 print("NumOfmisses" + "\(MissCounter)")
-
+                
             }
-        //}
-     }
+            //}
+        }
         
-       
+        
         
     }
     
-//    func initAnimation(){
-//    
-//       Frogview?.image = frogImage
-//        animation(element: Frogview!)
-//    }
+    //    func initAnimation(){
+    //
+    //       Frogview?.image = frogImage
+    //        animation(element: Frogview!)
+    //    }
     
     
     func initGame(){
         frogpop = Timer.scheduledTimer(timeInterval: randomNumber(), target: self, selector: #selector(timeTohitFrog), userInfo: nil, repeats: true)
-
+        
     }
     
     func setImage(){
@@ -240,17 +305,17 @@ class GameCell: UICollectionViewCell {
     
     func timeTohitFrog(){
         if (!StopGame){
-                if (!isFrog) {
-                    isFrog=true
-                    btnClickFrog.setImage(frogImage, for: .normal)
-                } else {
-                    isFrog = false
-                    btnClickFrog.setImage(leafImage, for: .normal)
-                }
-         
+            if (!isFrog) {
+                isFrog=true
+                btnClickFrog.setImage(frogImage, for: .normal)
+            } else {
+                isFrog = false
+                btnClickFrog.setImage(leafImage, for: .normal)
+            }
+            
         }
-     
-       
+        
+        
         
     }
     
@@ -273,15 +338,15 @@ class GameCell: UICollectionViewCell {
             print(error.description)
         }
     }
-//    func animation(element: UIImageView!){
-//    
-//        element.animationDuration(0.8, delay: 0.2, usingSpringWithDamping:
-//            0.2, initialSpringVelocity: 0.5, options: .CurveEaseOut, animations: {
-//                self.shootedViewRightMarginConstraint.constant += 70
-//                self.view.layoutIfNeeded()
-//        }, completion: nil)
-//
-//    }
+    //    func animation(element: UIImageView!){
+    //
+    //        element.animationDuration(0.8, delay: 0.2, usingSpringWithDamping:
+    //            0.2, initialSpringVelocity: 0.5, options: .CurveEaseOut, animations: {
+    //                self.shootedViewRightMarginConstraint.constant += 70
+    //                self.view.layoutIfNeeded()
+    //        }, completion: nil)
+    //
+    //    }
     
     
     
