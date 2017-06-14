@@ -74,8 +74,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         DisplayTimer()
         TimerLabel.text = "\(MissCounter)"
         ScorePoint.text = "\(HitFrogCounter)"
-        
-        
+        print("fdfd")
     }
     
     func DisplayTimer() {

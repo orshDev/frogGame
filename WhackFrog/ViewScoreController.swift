@@ -95,9 +95,6 @@ class PlayerCell : UITableViewCell {
     //var score_play: UILabel?
     var datetime =  Date() as NSDate?
     
-//    @IBOutlet weak var labelScore: UILabel!
-//    @IBOutlet weak var PalyerName: UILabel!
-//    @IBOutlet weak var labelDate: UILabel!
     @IBOutlet weak var lblScore: UILabel!
     @IBOutlet weak var lblDate: UILabel!
     @IBOutlet weak var PlayerName: UILabel!
