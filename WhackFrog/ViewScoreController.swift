@@ -13,10 +13,13 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     
     @IBOutlet weak var tableView: UITableView!
     
+   
+    @IBOutlet weak var buttonMap: UIButton!
     //let pageTitle = UIImage(named:"high-score.png")
     
     @IBOutlet weak var pageTitleView: UIImageView!
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,6 +86,18 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     func tableView( _ tableView : UITableView, numberOfRowsInSection section :Int)->Int{
         return scores.count
     }
+    
+    @IBAction func btnMap(_ sender: Any) {
+        
+         performSegue(withIdentifier: "moveToMap", sender: self)
+    }
+ 
+
+        
+    
+    
+    
+    
     
     
     
