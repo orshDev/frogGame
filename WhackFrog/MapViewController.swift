@@ -41,8 +41,8 @@ class MapViewController: UIViewController,CLLocationManagerDelegate {
         }
         // Do any additional setup after loading the view.
         //Zoom to user location
-        let noLocation = CLLocationCoordinate2D()
-        let viewRegion = MKCoordinateRegionMakeWithDistance(noLocation, 10000, 100000)
+        let noLocation = CLLocationCoordinate2D(latitude: (locationManager.location?.coordinate.latitude)!, longitude: (locationManager.location?.coordinate.longitude)!)
+        let viewRegion = MKCoordinateRegionMakeWithDistance(noLocation,10,5)
         Mapref.setRegion(viewRegion, animated: false)
 
     }
