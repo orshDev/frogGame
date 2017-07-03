@@ -12,8 +12,9 @@ import CoreMotion
 
 var Timer1 = Timer()
 var frogpop : Timer!
-var MissCounter = 0
+var TimerGame = 60
 var HitFrogCounter = 0
+var wheelpress = 3
 var StopGame = false
 var usewheel = false
 var player:AVAudioPlayer?
@@ -27,6 +28,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     @IBOutlet weak var collectionView: UICollectionView!
     
+    @IBOutlet weak var attemptLabel: UILabel!
     @IBOutlet weak var wheelView: UIImageView!
     @IBOutlet weak var lblName: UITextField!
     @IBOutlet var background: UIView?
@@ -60,15 +62,13 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     @IBOutlet weak var GameFinishHeader: UIImageView?
     
     @IBOutlet weak var ScoreBoard: UIImageView!
-    
+
     @IBOutlet weak var TimeBoard: UIImageView!
+    
     
        //  var player = AVAudioPlayer()
     var collection : UICollectionView?
-    @IBAction func btnwheel(_ sender: Any) {
-        print("use wheel")
-        usewheel = true
-    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -94,23 +94,6 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         
         
         
-        // Ask for Authorisation from the User.
-//        self.locationManager.requestAlwaysAuthorization()
-//        
-//        // For use in foreground
-//        self.locationManager.requestWhenInUseAuthorization()
-//        
-//        self.locationManager.delegate = self
-//        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-//        self.locationManager.requestWhenInUseAuthorization()
-//        self.locationManager.startUpdatingLocation()
-//        
-//        if CLLocationManager.locationServicesEnabled() {
-//            locationManager.delegate = self
-//            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-//            locationManager.startUpdatingLocation()
-//        }
-        
         UIGraphicsEndImageContext()
         
         self.view.backgroundColor = UIColor(patternImage: image)
@@ -119,7 +102,8 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         ScoreBoard.image = boardImage
         TimeBoard.image = boardImage
         DisplayTimer()
-        TimerLabel.text = "\(MissCounter)"
+        attemptLabel.text = "\(wheelpress)"
+        TimerLabel.text = "\(TimerGame)"
         ScorePoint.text = "\(HitFrogCounter)"
         print("fdfd")
     }
@@ -149,6 +133,14 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         
     }
     
+    @IBAction func btnwheel(_ sender: Any) {
+        
+        if(wheelpress>0){
+        usewheel = true
+        print("use wheel")
+        }
+    }
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways {
             if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
@@ -167,13 +159,18 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func updateTimer() {
         
         
-        if MissCounter < 3 {
-            
-            TimerLabel.text = "\(MissCounter)"
+        if TimerGame > 0 {
+            TimerGame = TimerGame-1
+            if(usewheel){
+                wheelpress = wheelpress-1
+                usewheel = false
+            }
+            attemptLabel.text = "\(wheelpress)"
+            TimerLabel.text = "\(TimerGame)"
             ScorePoint.text = "\(HitFrogCounter)"
         } else {
             print("finish")
-            TimerLabel.text = "\(MissCounter)"
+            TimerLabel.text = "\(TimerGame)"
             StopGame=true
         }
         checkFinishGame()
@@ -228,30 +225,30 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             }
             
         }
-        if (HitFrogCounter == 30){
-            print("Game over you win")
-            Timer1.invalidate()
-            frogpop.invalidate()
-            StopGame = true
-            self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
-            StartGameView?.image = #imageLiteral(resourceName: "newgame")
-            print("gfg");
+//        if (HitFrogCounter == 30){
+//            print("Game over you win")
+//            Timer1.invalidate()
+//            frogpop.invalidate()
+//            StopGame = true
+//            self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
+//            StartGameView?.image = #imageLiteral(resourceName: "newgame")
+//            print("gfg");
+//            
+//            //check if in high score table
+//            InHighScore = checkIfInHighScore()
+//            if (InHighScore){
+//                btnSave.isHidden = false
+//                btnScores.isHidden = false
+//                lblName.isHidden = false
+//                
+//            }
+//            else{
+//                btnSave.setTitle("continue",for : .normal)
+//                btnSave.isHidden = false
+//            }
+        
             
-            //check if in high score table
-            InHighScore = checkIfInHighScore()
-            if (InHighScore){
-                btnSave.isHidden = false
-                btnScores.isHidden = false
-                lblName.isHidden = false
-                
-            }
-            else{
-                btnSave.setTitle("continue",for : .normal)
-                btnSave.isHidden = false
-            }
-            
-            
-        }
+       // }
     }
     
     func checkIfInHighScore()->Bool{
@@ -340,15 +337,17 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         if (StopGame){
             print("start new game")
             HitFrogCounter = 0
-            MissCounter = 0
+            TimerGame = 60
             StopGame = false
             turnofimages()
-            TimerLabel.text = "\(MissCounter)"
+            TimerLabel.text = "\(TimerGame)"
             ScorePoint.text = "\(HitFrogCounter)"
             frogpop.fire()
             DisplayTimer()
             btnScores.isHidden = true
-            
+            lblName.isHidden = true
+            btnSave.isHidden = true
+
             
             //collectionView.reloadItems(at: [IndexPath])
             
@@ -384,8 +383,8 @@ class GameCell: UICollectionViewCell {
                 
             }
             else{
-                MissCounter += 1
-                print("NumOfmisses" + "\(MissCounter)")
+               // MissCounter += 1 // last version
+              //  print("NumOfmisses" + "\(MissCounter)")
                 
             }
             //}
