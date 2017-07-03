@@ -7,41 +7,51 @@
 import UIKit
 import AudioToolbox
 import AVFoundation
+import CoreLocation
+import CoreMotion
 
 var Timer1 = Timer()
 var frogpop : Timer!
 var MissCounter = 0
 var HitFrogCounter = 0
 var StopGame = false
+var usewheel = false
 var player:AVAudioPlayer?
 
 
 
-
-class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
+class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource,CLLocationManagerDelegate {
+    
+    
+    var motionManager = CMMotionManager()
     
     @IBOutlet weak var collectionView: UICollectionView!
     
+    @IBOutlet weak var wheelView: UIImageView!
     @IBOutlet weak var lblName: UITextField!
     @IBOutlet var background: UIView?
     @IBOutlet weak var TimerLabel: UILabel!
     var GameOver: Bool = false
     let winImage = UIImage(named:"youwin.jpg")
     let timeOverImage = UIImage(named:"gameover.jpg")
+    let wheelImage = UIImage(named:"savewheel.png")
     
     let boardImage = UIImage(named:"board.jpg")
     let newGameImage = UIImage(named:"newgame.jpg")
-    
+    var locationManager: CLLocationManager!
+
     var scores : [Score] = []
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     var InHighScore:Bool = false;
-    
+    var cell :  GameCell!
+    @IBOutlet weak var btnwheel: UIButton!
+   
     @IBOutlet weak var ScorePoint: UILabel!
     
     @IBOutlet weak var btnSave: UIButton!
     
     @IBOutlet weak var btnScores: UIButton!
+    
     
     @IBOutlet weak var StartGameView: UIImageView?
     @IBOutlet weak var StartNewGame: UIButton!
@@ -53,11 +63,17 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     @IBOutlet weak var TimeBoard: UIImageView!
     
-    //  var player = AVAudioPlayer()
-    
+       //  var player = AVAudioPlayer()
+    var collection : UICollectionView?
+    @IBAction func btnwheel(_ sender: Any) {
+        print("use wheel")
+        usewheel = true
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        
         
         //set background
         UIGraphicsBeginImageContext(self.view.frame.size)
@@ -65,10 +81,41 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         
         let image: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         
+        //location
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.requestAlwaysAuthorization()
+        
+        self.locationManager.startUpdatingLocation()
+        
+        view.backgroundColor = UIColor.gray
+        
+        
+        
+        
+        
+        // Ask for Authorisation from the User.
+//        self.locationManager.requestAlwaysAuthorization()
+//        
+//        // For use in foreground
+//        self.locationManager.requestWhenInUseAuthorization()
+//        
+//        self.locationManager.delegate = self
+//        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+//        self.locationManager.requestWhenInUseAuthorization()
+//        self.locationManager.startUpdatingLocation()
+//        
+//        if CLLocationManager.locationServicesEnabled() {
+//            locationManager.delegate = self
+//            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+//            locationManager.startUpdatingLocation()
+//        }
+        
         UIGraphicsEndImageContext()
         
         self.view.backgroundColor = UIColor(patternImage: image)
-        
+        wheelView.image = wheelImage
+      
         ScoreBoard.image = boardImage
         TimeBoard.image = boardImage
         DisplayTimer()
@@ -77,6 +124,42 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         print("fdfd")
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        motionManager.gyroUpdateInterval = 0.2
+        print("enter Gyro")
+        
+
+        motionManager.startGyroUpdates(to: OperationQueue.current!){(dataGyro,error) in
+        
+            if let mydata = dataGyro{
+                if (usewheel){
+                
+                    if mydata.rotationRate.x > 2 || mydata.rotationRate.y > 2 {
+                        print("rotate screen")
+                        print(mydata.rotationRate)
+                        //
+                        
+                    }
+                }
+                
+              
+                
+            }
+        }
+        
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedAlways {
+            if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+                if CLLocationManager.isRangingAvailable() {
+                    // do stuff
+                }
+            }
+        }
+    }
+
+
     func DisplayTimer() {
         Timer1 = Timer.scheduledTimer(timeInterval: 1.0, target:self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
     }
@@ -97,17 +180,24 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     }
     
     
-    
     func collectionView(_ collectionView:UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 3
     }
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    func numberOfSections(in collection: UICollectionView) -> Int {
         return 3
     }
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCell", for: indexPath) as! GameCell
+    func collectionView(_ collection: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+         cell = collection.dequeueReusableCell(withReuseIdentifier: "GameCell", for: indexPath) as! GameCell
+        print(indexPath)
         cell.setImage()
-        cell.initGame()
+        if(usewheel){
+         cell.initGame(setuptime: 10)
+            print("slow")
+        }
+        else{
+         cell.initGame(setuptime: 2)
+        }
+       
         return cell
     }
     
@@ -145,7 +235,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             StopGame = true
             self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
             StartGameView?.image = #imageLiteral(resourceName: "newgame")
-            
+            print("gfg");
             
             //check if in high score table
             InHighScore = checkIfInHighScore()
@@ -167,14 +257,21 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func checkIfInHighScore()->Bool{
         
         let data =  getHighScorePlayersData()
-        
+        print(data)
+        if data.isEmpty{
+         return true
+        }
         let currentScore = Int16(HitFrogCounter);
         for playerdata in data
         {
             
+            
+           // if (3<currentScore ){
+           //     return true
+           // }
             if (playerdata.score<currentScore ){
                 return true
-            }
+           }
             
         }
         
@@ -197,11 +294,23 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     func saveScore() {
         if(InHighScore){
+            
+            //searching the current location
+            let locCoord = CLLocationCoordinate2DMake(self.locationManager.location!.coordinate.latitude, self.locationManager.location!.coordinate.longitude)
+            
+            // 1. pass the data from the current location to lat and lng
+            let latitude = locCoord.latitude
+            let longitude = locCoord.longitude
+            
             let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
             let score = Score(context: context)
             score.name = lblName.text!
             score.score = Int16(HitFrogCounter)
             score.date = Date() as NSDate?
+            score.lat = latitude
+            score.lng = longitude
+            print("lat" + "\(latitude)"+"lang"+"\(longitude)")
+        
         }
         
         
@@ -286,15 +395,16 @@ class GameCell: UICollectionViewCell {
         
     }
     
-    //    func initAnimation(){
-    //
-    //       Frogview?.image = frogImage
-    //        animation(element: Frogview!)
-    //    }
+        func initAnimation(){
+    
+          Frogview?.image = frogImage
+           animation()
+        }
     
     
-    func initGame(){
-        frogpop = Timer.scheduledTimer(timeInterval: randomNumber(), target: self, selector: #selector(timeTohitFrog), userInfo: nil, repeats: true)
+    func initGame(setuptime: Int){
+        initAnimation()
+        frogpop = Timer.scheduledTimer(timeInterval: randomNumber(numDelay: setuptime), target: self, selector: #selector(timeTohitFrog), userInfo: nil, repeats: true)
         
     }
     
@@ -318,8 +428,22 @@ class GameCell: UICollectionViewCell {
         
     }
     
-    func randomNumber() -> Double{
-        let randomNum:UInt32 = arc4random_uniform(2) + 1
+    override func prepareForReuse() {
+        
+    }
+    
+    func randomNumber(numDelay: Int) -> Double{
+        print("enter random")
+        var randomNum:UInt32
+        if (usewheel){
+            print("enter slow mode")
+           randomNum = arc4random_uniform(UInt32(2)) + 1
+
+        }
+        else{
+         randomNum = arc4random_uniform(UInt32(10)) + 1
+        }
+        
         let num:Double = Double(randomNum)
         return num
     }
@@ -337,16 +461,20 @@ class GameCell: UICollectionViewCell {
             print(error.description)
         }
     }
-    //    func animation(element: UIImageView!){
-    //
-    //        element.animationDuration(0.8, delay: 0.2, usingSpringWithDamping:
-    //            0.2, initialSpringVelocity: 0.5, options: .CurveEaseOut, animations: {
-    //                self.shootedViewRightMarginConstraint.constant += 70
-    //                self.view.layoutIfNeeded()
-    //        }, completion: nil)
-    //
-    //    }
+        func animation(){
     
+            UIView.animate(withDuration: 0.7, delay: 1.0, options: .curveEaseOut, animations: {
+                
+                
+                var frogFrame = self.Frogview?.frame
+                frogFrame?.origin.y += (frogFrame?.size.height)!
+                
+                
+            }, completion: { finished in
+                print("frog move animation")
+            })        }
+    
+
     
     
 }

@@ -13,13 +13,11 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     
     @IBOutlet weak var tableView: UITableView!
     
-   
-    @IBOutlet weak var buttonMap: UIButton!
+    @IBOutlet weak var mapbtn: UIButton!
     //let pageTitle = UIImage(named:"high-score.png")
     
     @IBOutlet weak var pageTitleView: UIImageView!
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +29,11 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
         // Do any additional setup after loading the view.
         
         //pageTitleView.image = pageTitle
+    }
+    @IBAction func MapbtnPress(_ sender: Any) {
+        
+          performSegue(withIdentifier: "navigate_scoreTable_to_map", sender: self)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,7 +53,9 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     func getData()
     {
         do{
+        
             scores = try context.fetch(Score.fetchRequest())
+        
         }
         catch{
             print("Fetch Failed")
@@ -60,6 +65,7 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     
     func sortList() { // should probably be called sort and not filter
         scores.sort() { $0.score > $1.score } // sort the fruit by name
+
         tableView.reloadData(); // notify the table view the data has changed
     }
     
@@ -86,18 +92,6 @@ class ViewScoreControllerViewController: UIViewController ,UITableViewDataSource
     func tableView( _ tableView : UITableView, numberOfRowsInSection section :Int)->Int{
         return scores.count
     }
-    
-    @IBAction func btnMap(_ sender: Any) {
-        
-         performSegue(withIdentifier: "moveToMap", sender: self)
-    }
- 
-
-        
-    
-    
-    
-    
     
     
     
