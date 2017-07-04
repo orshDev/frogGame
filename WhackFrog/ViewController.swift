@@ -12,11 +12,14 @@ import CoreMotion
 
 var Timer1 = Timer()
 var frogpop : Timer!
+
+
 var TimerGame = 60
 var HitFrogCounter = 0
 var wheelpress = 3
 var StopGame = false
 var usewheel = false
+var setAllleaf = false
 var player:AVAudioPlayer?
 
 
@@ -66,7 +69,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     @IBOutlet weak var TimeBoard: UIImageView!
     
     
-       //  var player = AVAudioPlayer()
+    
     var collection : UICollectionView?
     
     override func viewDidLoad() {
@@ -89,9 +92,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         self.locationManager.startUpdatingLocation()
         
         view.backgroundColor = UIColor.gray
-        
-        
-        
+      
         
         
         UIGraphicsEndImageContext()
@@ -132,6 +133,22 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         }
         
     }
+    func setButtonsToLeafs(){
+    
+        print("set to leaf")
+        var arr = [GameCell]()
+         arr = self.collection?.visibleCells as! [GameCell]
+        
+
+        for i in 0...(arr.count-1){
+                arr[i].setImage()
+        }
+        
+    //   print(arr.count)
+    
+        
+    }
+    
     
     @IBAction func btnwheel(_ sender: Any) {
         
@@ -159,12 +176,29 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func updateTimer() {
         
         
-        if TimerGame > 0 {
+        if TimerGame > 0
+        {
             TimerGame = TimerGame-1
             if(usewheel){
                 wheelpress = wheelpress-1
                 usewheel = false
+                
+                
+                
             }
+            
+            //print("status" + "\(setAllleaf)")
+            if(setAllleaf){
+                print("gfd set to leaf")
+                frogpop.invalidate()
+
+                Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(setButtonsToLeafs), userInfo: nil, repeats: false)
+                setAllleaf = false
+                print("finish set to leaf")
+                // Timer.scheduledTimer(timeInterval: <#T##TimeInterval#>, invocation: <#T##NSInvocation#>, repeats: <#T##Bool#>)
+            }
+
+            
             attemptLabel.text = "\(wheelpress)"
             TimerLabel.text = "\(TimerGame)"
             ScorePoint.text = "\(HitFrogCounter)"
@@ -180,11 +214,12 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func collectionView(_ collectionView:UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 3
     }
-    func numberOfSections(in collection: UICollectionView) -> Int {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 3
     }
-    func collectionView(_ collection: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-         cell = collection.dequeueReusableCell(withReuseIdentifier: "GameCell", for: indexPath) as! GameCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        self.collection = collectionView
+         cell = collection?.dequeueReusableCell(withReuseIdentifier: "GameCell", for: indexPath) as! GameCell
         print(indexPath)
         cell.setImage()
         if(usewheel){
@@ -225,30 +260,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
             }
             
         }
-//        if (HitFrogCounter == 30){
-//            print("Game over you win")
-//            Timer1.invalidate()
-//            frogpop.invalidate()
-//            StopGame = true
-//            self.GameFinishHeader?.image = #imageLiteral(resourceName: "youwin")
-//            StartGameView?.image = #imageLiteral(resourceName: "newgame")
-//            print("gfg");
-//            
-//            //check if in high score table
-//            InHighScore = checkIfInHighScore()
-//            if (InHighScore){
-//                btnSave.isHidden = false
-//                btnScores.isHidden = false
-//                lblName.isHidden = false
-//                
-//            }
-//            else{
-//                btnSave.setTitle("continue",for : .normal)
-//                btnSave.isHidden = false
-//            }
-        
-            
-       // }
+
     }
     
     func checkIfInHighScore()->Bool{
@@ -357,11 +369,14 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
 
 class GameCell: UICollectionViewCell {
     @IBOutlet weak var btnClickFrog: UIButton!
-    let frogImage = UIImage(named:"frog.jpg")
+    var frogSwitch = Timer()
+       let numberOfImages: UInt32 = 2
+    let frogImage = UIImage(named:"frog\(arc4random_uniform(2) + 1).png")
     let leafImage = UIImage(named:"leaf.jpg")
     @IBOutlet weak var Frogview: UIImageView?
     var isFrog :Bool = false
     var hit: Bool = false
+    var  imageName = ""
     var counterpopFrog = 0
     var numofpopFrog = 2
     var urlSound = "http://soundbible.com/mp3/Bull Frog-SoundBible.com-1416996315.mp3"
@@ -374,20 +389,25 @@ class GameCell: UICollectionViewCell {
         
         if (!StopGame){
             
-            if isFrog{
-                btnClickFrog.setImage(leafImage, for: .normal)
-                HitFrogCounter += 1
-                print("Score" + "\(HitFrogCounter)")
-                // playSound()
-                hit = true
-                
+            if (sender.currentImage == UIImage(named: "frog2.png")){
+            print("hit monster")
+                HitFrogCounter -= 1
+                setAllleaf = true
             }
             else{
-               // MissCounter += 1 // last version
-              //  print("NumOfmisses" + "\(MissCounter)")
-                
+                if isFrog{
+                    btnClickFrog.setImage(leafImage, for: .normal)
+                    HitFrogCounter += 1
+                    print("Score" + "\(HitFrogCounter)")
+                    // playSound()
+                    hit = true
+                    
+                }
+            
             }
-            //}
+            
+            
+            
         }
         
         
@@ -402,6 +422,8 @@ class GameCell: UICollectionViewCell {
     
     
     func initGame(setuptime: Int){
+        
+
         initAnimation()
         frogpop = Timer.scheduledTimer(timeInterval: randomNumber(numDelay: setuptime), target: self, selector: #selector(timeTohitFrog), userInfo: nil, repeats: true)
         
@@ -413,6 +435,8 @@ class GameCell: UICollectionViewCell {
     
     func timeTohitFrog(){
         if (!StopGame){
+           
+            
             if (!isFrog) {
                 isFrog=true
                 btnClickFrog.setImage(frogImage, for: .normal)
